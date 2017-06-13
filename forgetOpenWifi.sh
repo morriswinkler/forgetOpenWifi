@@ -1,59 +1,69 @@
-#!/bin/bash
-
-# variables
-file1=/home/$USER/file1.txt
-file2=/home/$USER/file2.txt
-file2new=/home/$USER/file2new.txt
-file3=/home/$USER/file3.txt
-file4=/home/$USER/file4.txt
-file5=/home/$USER/file5.txt
+# set variables
+a=/home/$USER/1.txt
+b=/home/$USER/2.txt
+c=/home/$USER/3.txt
+d=/home/$USER/4.txt
+e=/home/$USER/5.txt
+f=/home/$USER/6.txt
+g=/home/$USER/7.txt
+h=/home/$USER/8.txt
+i=/home/$USER/9.txt
+j=/home/$USER/a.txt
 
 # shutdown networking
-sudo bash -c "nmcli networking off"
+nmcli networking off 2> /dev/null
 
+# grep all networks without encryption 
+sudo grep -L "psk=" /etc/NetworkManager/system-connections/* > $a
 
-# grep all unencrypted wifi connections and write it to file1
-sudo bash -c "grep -L "psk=" /etc/NetworkManager/system-connections/* > "$file1""
+# remove absolute pathnames from output
+cut -c 40-70 $a > $b
 
+# get all ethernet networks
+nmcli --fields NAME,TYPE connection | grep 802-3.ethernet > $c
 
-# remove absolute pathnames inside file1 and write output to file2
-sudo bash -c "cut -c 40-70 "$file1" > "$file2""
+# remove string from output
+sed 's/802-3-ethernet//g' $c > $d
 
+# join the two lists and keep only wifi connections without encryption
+join -v 1 <(sort $b) <(sort $d) > $e
 
-# sourround all lines in file2 with apostrophes and write it to file2new
-sed -e "s/\(.*\)/'\1'/" $file2 > $file2new
+# sourround all lines in output with apostrophes
+sed -e "s/\(.*\)/'\1'/" $e > $f
 
+# show more information for unencrypted wifi connections
+cat $f | xargs nmcli con show > $g 2> /dev/null
 
-# show more information for unencrypted wifi connections and write it to file3
-sudo bash -c "cat $file2new | xargs nmcli con show > "$file3" 2> /dev/null"  
+# for each unencrypted wifi connection find uuid
+grep uuid $g > $h 2> /dev/null
 
+# remove string from output
+cut -c 17-80 $h > $i
 
-# for each result find uuid and write it to file4
-sudo bash -c "grep uuid $file3 > "$file4" 2> /dev/null"
+# remove white spaces
+cut -c 25-80 $i > $j
 
+# delete connections with uuid
+cat $j | xargs nmcli connection delete 2> /dev/null
 
-# remove unwanted characters from file4 and write it to file5  
-sudo bash -c "cut -c 17-80 "$file4" > "$file5""
-
-
-
-# for each uuid in file5 delete connection
-sudo bash -c "cat $file5 | xargs nmcli connection delete 2> /dev/null"
-
-
-# removes temp files
-sudo bash -c "rm -f "$file1""
-sudo bash -c "rm -f "$file2""
-sudo bash -c "rm -f "$file2new""
-sudo bash -c "rm -f "$file3""
-sudo bash -c "rm -f "$file4""
-sudo bash -c "rm -f "$file5""
+# remove temp files
+rm -f $a
+rm -f $b
+rm -f $c
+rm -f $d
+rm -f $e
+rm -f $f
+rm -f $g
+rm -f $h
+rm -f $i
+rm -f $j
 
 # show network connections
 nmcli connection show
 
 # start networking
-sudo bash -c "nmcli networking on"
+nmcli networking on 2> /dev/null
 
 
 exit $?
+
