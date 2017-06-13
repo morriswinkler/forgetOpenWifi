@@ -1,14 +1,14 @@
 # set variables
-a=/home/$USER/1.txt
-b=/home/$USER/2.txt
-c=/home/$USER/3.txt
-d=/home/$USER/4.txt
-e=/home/$USER/5.txt
-f=/home/$USER/6.txt
-g=/home/$USER/7.txt
-h=/home/$USER/8.txt
-i=/home/$USER/9.txt
-j=/home/$USER/a.txt
+a=/tmp/1.txt
+b=/tmp/2.txt
+c=/tmp/3.txt
+d=/tmp/4.txt
+e=/tmp/5.txt
+f=/tmp/6.txt
+g=/tmp/7.txt
+h=/tmp/8.txt
+i=/tmp/9.txt
+j=/tmp/a.txt
 
 # shutdown networking
 nmcli networking off 2> /dev/null
@@ -66,4 +66,3 @@ nmcli networking on 2> /dev/null
 
 
 exit $?
-
