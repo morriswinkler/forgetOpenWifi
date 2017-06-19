@@ -1,0 +1,27 @@
+#!/usr/local/bin/bash
+
+# declare $config to be an associative array
+declare -A config
+
+for i in `ls $1`
+         do
+
+             echo $i
+             while IFS='=' read -r key val ; do
+                 config["$key"]="$val"
+             done <  <(sed -E -e '/^\[/d
+                     s/#.*//
+                     s/[[:blank:]]+$|^[[:blank:]]+//g' $i )
+
+# now print out the config array
+#echo ${config["uuid"]}
+
+             if [[ ${config["type"]} == "wifi" ]]; then
+
+                 if [[ ${config["psk"]} == "" ]]; then
+
+                     echo ${config["uuid"]}
+                 fi
+             fi
+
+done
